@@ -36,7 +36,8 @@
   .thumb-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .badge { position: absolute; top: 8px; left: 8px; background: rgba(15,23,42,0.78); color: #fff; padding: 2px 8px; border-radius: 999px; font-size: 0.74rem; font-weight: 700; }
   .card-info { padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; font-size: 0.82rem; }
-  .country-tag { font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .card-title { font-weight: 800; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .country-tag { font-weight: 600; font-size: 0.78rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .coord-btn { display: inline-flex; align-items: center; justify-content: space-between; background: var(--pill); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px; font-family: ui-monospace, Consolas, monospace; font-size: 0.78rem; cursor: pointer; width: 100%; }
   .coord-btn:hover { border-color: var(--accent); }
   .links { display: flex; justify-content: space-between; color: var(--muted); font-size: 0.76rem; }
@@ -53,7 +54,7 @@
       <div class="brand">
         <h1>📮 皮克敏明信片座標備份庫</h1>
         <span class="count-pill" id="shownCount">共 616 張</span>
-        <span class="meta">更新時間：2026-11-15 05:03 ｜ 來源備份：v0-pikmin-postcard-website-inky.vercel.app</span>
+        <span class="meta">更新時間：2026-11-15 05:06 ｜ 來源備份：v0-pikmin-postcard-website-inky.vercel.app</span>
       </div>
       <button class="btn" id="themeBtn">🌙 深色模式</button>
     </div>
@@ -113,8 +114,9 @@ function render() {
     if (c && it.country !== c) return false;
     if (cat && it.category !== cat) return false;
     if (q) {
-      const hay = `${it.name} ${it.country} ${it.category} ${it.coordinates}`.toLowerCase();
-      if (!hay.includes(q)) return false;
+      const hay = `${it.name} ${it.country} ${it.region} ${it.category} ${it.type} ${it.coordinates}`.toLowerCase();
+      const terms = q.split(/\s+/).filter(Boolean);
+      if (!terms.every(t => hay.includes(t))) return false;
     }
     return true;
   });
@@ -132,8 +134,10 @@ function render() {
     thumb.appendChild(badge);
 
     const info = document.createElement('div'); info.className = 'card-info';
+    const titleEl = document.createElement('div'); titleEl.className = 'card-title';
+    titleEl.textContent = it.name || it.country || '明信片'; titleEl.title = it.name || '';
     const ctag = document.createElement('div'); ctag.className = 'country-tag';
-    ctag.textContent = `🌏 ${it.country || '未知'} · ${it.name || ''}`;
+    ctag.textContent = `🌏 ${it.country || '未知'} · ${it.category || it.type || ''}`;
     const coordBtn = document.createElement('button'); coordBtn.className = 'coord-btn';
     coordBtn.innerHTML = `<span>📍 ${it.coordinates}</span><span>📋</span>`;
     coordBtn.addEventListener('click', () => {
@@ -145,7 +149,7 @@ function render() {
     const coords = (it.coordinates || '').replace(/\s+/g, '');
     const gmap = `https://www.google.com/maps?q=${coords}`;
     links.innerHTML = `<span>📅 ${(it.created_at || '').slice(0, 10)}</span><a href="${gmap}" target="_blank">🗺️ 導航</a>`;
-    info.append(ctag, coordBtn, links);
+    info.append(titleEl, ctag, coordBtn, links);
     card.append(thumb, info);
     grid.appendChild(card);
   }
